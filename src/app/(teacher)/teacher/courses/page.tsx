@@ -308,7 +308,7 @@ function TeacherModuleRow({ module, index, courseId, onDelete }: {
                     {pdf.title}
                   </p>
                 </div>
-                <PdfAccessManager pdf={pdf} moduleId={module.id} />
+                <PdfAccessManager pdf={pdf} moduleId={module.id} courseId={courseId} />
                 <Button
                   variant="ghost" size="sm"
                   className="h-6 w-6 p-0 text-slate-300

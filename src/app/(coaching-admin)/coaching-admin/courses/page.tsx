@@ -262,7 +262,7 @@ function ModuleManager({ courseId }: { courseId: string }) {
 
             {/* PDF Section */}
             {expandedModule === m.id && (
-              <PdfManager moduleId={m.id} />
+              <PdfManager moduleId={m.id} courseId={courseId}/>
             )}
           </div>
         ))}
@@ -278,7 +278,7 @@ function ModuleManager({ courseId }: { courseId: string }) {
 }
 
 // ── PDF Manager ─────────────────────────────────────────
-function PdfManager({ moduleId }: { moduleId: string }) {
+function PdfManager({ moduleId, courseId }: { moduleId: string; courseId: string }) {
   const qc = useQueryClient()
   const [pdfTitle, setPdfTitle] = useState('')
   const [uploading, setUploading] = useState(false)
@@ -377,7 +377,7 @@ function PdfManager({ moduleId }: { moduleId: string }) {
             </div>
             <div className="flex items-center gap-1 shrink-0">
               {/* Access management */}
-              <PdfAccessManager pdf={pdf} moduleId={moduleId} />
+              <PdfAccessManager pdf={pdf} moduleId={moduleId} courseId={courseId} />
                 
               {/* Delete */}
               <Button

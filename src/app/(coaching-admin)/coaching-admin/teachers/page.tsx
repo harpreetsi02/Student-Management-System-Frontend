@@ -19,6 +19,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { Plus, Search, Trash2, Users } from 'lucide-react'
 import { Teacher } from '@/types'
+import { useRouter } from 'next/navigation'
 
 const schema = z.object({
   name:     z.string().min(2, 'Required'),
@@ -121,6 +122,7 @@ export default function TeachersPage() {
   const [open, setOpen]     = useState(false)
   const [search, setSearch] = useState('')
   const qc                  = useQueryClient()
+  const router              = useRouter()
 
   const { data: teachers, isLoading } = useQuery({
     queryKey: ['ca-teachers', search],
@@ -231,6 +233,15 @@ export default function TeachersPage() {
               >
                 <Trash2 className="h-3.5 w-3.5 mr-1.5" />
                 Delete Teacher
+              </Button>
+              <Button
+                variant="outline" size="sm"
+                className="w-full text-xs mb-2"
+                onClick={() => router.push(
+                  `/coaching-admin/teachers/${t.id}`
+                )}
+              >
+                View Details
               </Button>
             </CardContent>
           </Card>

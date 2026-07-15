@@ -2,7 +2,7 @@
 
 import DashboardLayout from '@/components/layout/DashboardLayout'
 import SidebarLink from '@/components/layout/SidebarLink'
-import { LayoutDashboard, Bell, BarChart3, Calendar, BookOpen, Map } from 'lucide-react'
+import { LayoutDashboard, Bell, BarChart3, Calendar, BookOpen, Map, User } from 'lucide-react'
 
 const links = [
   { href: '/teacher/dashboard',   label: 'Dashboard',   icon: LayoutDashboard },
@@ -11,6 +11,7 @@ const links = [
   { href: '/teacher/attendance',  label: 'Attendance',  icon: Calendar },
   { href: '/teacher/results',     label: 'Results',     icon: BarChart3 },
   { href: '/teacher/notices',     label: 'Notices',     icon: Bell },
+  { href: '/teacher/profile',     label: 'Profile',     icon: User },
 ]
 
 export default function TeacherLayout({

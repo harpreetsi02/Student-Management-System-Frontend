@@ -5,6 +5,7 @@ import SidebarLink from '@/components/layout/SidebarLink'
 import {
   LayoutDashboard, BookOpen, Bell,
   Wallet, BarChart3, Calendar,
+  User,
 } from 'lucide-react'
 
 const links = [
@@ -14,6 +15,7 @@ const links = [
   { href: '/student/fees',      label: 'Fees',       icon: Wallet },
   { href: '/student/results',   label: 'Results',    icon: BarChart3 },
   { href: '/student/notices',   label: 'Notices',    icon: Bell },
+  { href: '/student/profile',   label: 'Profile',    icon: User },
 ]
 
 export default function StudentLayout({

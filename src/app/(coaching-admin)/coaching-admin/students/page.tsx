@@ -18,10 +18,11 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import {
-  Plus, Search, Trash2,
+  Plus, Search, Trash2, Eye,
   GraduationCap, UserCheck, UserX,
 } from 'lucide-react'
 import { Student } from '@/types'
+import { useRouter } from 'next/navigation'
 
 // ── Schema ─────────────────────────────────────────────
 const schema = z.object({
@@ -151,6 +152,7 @@ export default function StudentsPage() {
   const [open, setOpen]     = useState(false)
   const [search, setSearch] = useState('')
   const qc                  = useQueryClient()
+  const router = useRouter()
 
   const { data: students, isLoading } = useQuery({
     queryKey: ['ca-students', search],
@@ -321,6 +323,15 @@ export default function StudentsPage() {
                             }}
                           >
                             <Trash2 className="h-3.5 w-3.5" />
+                          </Button>
+                          <Button
+                            variant="ghost" size="sm"
+                            className="h-7 w-7 p-0 text-slate-400 hover:text-blue-600"
+                            onClick={() => router.push(
+                              `/coaching-admin/students/${s.id}`
+                            )}
+                          >
+                            <Eye className="h-3.5 w-3.5" />
                           </Button>
                         </div>
                       </td>

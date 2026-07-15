@@ -8,81 +8,122 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import {
   BookOpen, ChevronDown, ChevronUp,
-  FileText, Lock, Unlock,
+  Eye, FileText, Lock, Unlock,
 } from 'lucide-react'
 import { coachingAdminApi } from '@/lib/api/coachingAdmin'
+import PdfAccessManager from '@/components/shared/PdfAccessManager'
+import { Button } from '@/components/ui/button'
 
-function ModuleRow({ module }: { module: any }) {
+function ModuleRow({ module, courseId }: {
+  module:   any
+  courseId: string
+}) {
   const [expanded, setExpanded] = useState(false)
+  const [viewingPdf, setViewingPdf] = useState<{
+    id: string; title: string
+  } | null>(null)
 
-  const { data: pdfs = [] } = useQuery<any[]>({
+  const { data: pdfs = [], isLoading } = useQuery<any[]>({
     queryKey: ['ca-pdfs', module.id],
     queryFn:  () => coachingAdminApi.getPdfs(module.id),
     enabled:  expanded,
   })
 
   return (
-    <div className="border border-slate-100 rounded-xl overflow-hidden">
-      <div
-        className="flex items-center justify-between px-4 py-3
-                   bg-slate-50 cursor-pointer hover:bg-slate-100
-                   transition-colors"
-        onClick={() => setExpanded(!expanded)}
-      >
-        <div className="flex items-center gap-3">
-          <div className="w-7 h-7 rounded-full bg-blue-600 text-white
-                          flex items-center justify-center text-xs
-                          font-bold shrink-0">
-            {module.orderIndex + 1}
+    <>
+      <div className="border border-slate-100 rounded-xl overflow-hidden">
+        <div
+          className="flex items-center justify-between px-4 py-3
+                     bg-slate-50 cursor-pointer hover:bg-slate-100"
+          onClick={() => setExpanded(!expanded)}
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-7 h-7 rounded-full bg-blue-600 text-white
+                            flex items-center justify-center text-xs
+                            font-bold shrink-0">
+              {module.orderIndex + 1}
+            </div>
+            <div>
+              <p className="text-sm font-medium text-slate-800">
+                {module.name}
+              </p>
+              {module.description && (
+                <p className="text-xs text-slate-500 mt-0.5">
+                  {module.description}
+                </p>
+              )}
+            </div>
           </div>
-          <div>
-            <p className="text-sm font-medium text-slate-800">
-              {module.name}
-            </p>
-            {module.description && (
-              <p className="text-xs text-slate-500 mt-0.5">
-                {module.description}
+          <div className="flex items-center gap-2">
+            <Badge variant={module.locked ? 'secondary' : 'default'}
+              className="text-xs">
+              {module.locked ? '🔒 Locked' : '🔓 Open'}
+            </Badge>
+            {expanded
+              ? <ChevronUp className="h-4 w-4 text-slate-400" />
+              : <ChevronDown className="h-4 w-4 text-slate-400" />
+            }
+          </div>
+        </div>
+
+        {/* PDFs */}
+        {expanded && (
+          <div className="p-3 bg-white space-y-2 border-t border-slate-100">
+            {isLoading && <LoadingSpinner />}
+
+            {!isLoading && pdfs.length === 0 && (
+              <p className="text-xs text-slate-400 text-center py-2">
+                No PDFs in this module
               </p>
             )}
+
+            {pdfs.map((pdf: any) => (
+              <div key={pdf.id}
+                className="flex items-center justify-between
+                           px-3 py-2 bg-slate-50 rounded-lg
+                           border border-slate-100">
+                <div className="flex items-center gap-2 min-w-0">
+                  <FileText className="h-4 w-4 text-red-400 shrink-0" />
+                  <p className="text-sm text-slate-700 truncate">
+                    {pdf.title}
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-1 shrink-0">
+                  {/* ✅ Teacher bhi access manage kar sakta hai */}
+                  <PdfAccessManager
+                    pdf={pdf}
+                    moduleId={module.id}
+                    courseId={courseId}
+                  />
+
+                  {/* View PDF */}
+                  <Button
+                    size="sm" variant="ghost"
+                    className="h-7 text-xs text-blue-600 hover:bg-blue-50"
+                    onClick={() =>
+                      setViewingPdf({ id: pdf.id, title: pdf.title })
+                    }
+                  >
+                    <Eye className="h-3.5 w-3.5 mr-1" />
+                    View
+                  </Button>
+                </div>
+              </div>
+            ))}
           </div>
-        </div>
-        <div className="flex items-center gap-2">
-          <Badge variant={module.locked ? 'secondary' : 'default'}
-            className="text-xs">
-            {module.locked ? '🔒 Locked' : '🔓 Open'}
-          </Badge>
-          {expanded
-            ? <ChevronUp className="h-4 w-4 text-slate-400" />
-            : <ChevronDown className="h-4 w-4 text-slate-400" />
-          }
-        </div>
+        )}
       </div>
 
-      {expanded && (
-        <div className="p-3 bg-white space-y-2">
-          {pdfs.length === 0 && (
-            <p className="text-xs text-slate-400 text-center py-2">
-              No PDFs in this module
-            </p>
-          )}
-          {pdfs.map((pdf: any) => (
-            <div key={pdf.id}
-              className="flex items-center gap-2 px-3 py-2
-                         bg-slate-50 rounded-lg">
-              <FileText className="h-4 w-4 text-red-400 shrink-0" />
-              <p className="text-sm text-slate-700 flex-1 truncate">
-                {pdf.title}
-              </p>
-              {pdf.locked
-                ? <Lock className="h-3.5 w-3.5 text-red-400 shrink-0" />
-                : <Unlock className="h-3.5 w-3.5 text-green-500
-                                      shrink-0" />
-              }
-            </div>
-          ))}
-        </div>
+      {/* PDF Viewer */}
+      {viewingPdf && (
+        <PdfViewer
+          pdfId={viewingPdf.id}
+          title={viewingPdf.title}
+          onClose={() => setViewingPdf(null)}
+        />
       )}
-    </div>
+    </>
   )
 }
 
@@ -135,7 +176,7 @@ function CourseRoadmap({ courseId, courseName }: {
             </p>
           )}
           {modules.map((m: any) => (
-            <ModuleRow key={m.id} module={m} />
+            <ModuleRow key={m.id} module={m} courseId={courseId} />
           ))}
         </CardContent>
       )}
@@ -188,6 +229,58 @@ export default function TeacherRoadmapPage() {
             courseName={c.courseName}
           />
         ))}
+      </div>
+    </div>
+  )
+}
+
+function PdfViewer({ pdfId, title, onClose }: {
+  pdfId:   string
+  title:   string
+  onClose: () => void
+}) {
+  const { data, isLoading } = useQuery({
+    queryKey: ['teacher-pdf-url', pdfId],
+    queryFn: async () => {
+      const res = await api.get(`/pdfs/${pdfId}/view`)
+      return res.data
+    },
+  })
+
+  return (
+    <div
+      className="fixed inset-0 bg-black/80 z-50 flex
+                 items-center justify-center p-4"
+      onClick={onClose}
+    >
+      <div
+        className="bg-white rounded-2xl w-full max-w-4xl
+                   max-h-[92vh] flex flex-col"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between
+                        px-5 py-4 border-b border-slate-100">
+          <div className="flex items-center gap-2">
+            <FileText className="h-4 w-4 text-red-500" />
+            <p className="font-semibold text-slate-800 text-sm">
+              {title}
+            </p>
+          </div>
+          <Button variant="ghost" size="sm" onClick={onClose}
+            className="h-7 w-7 p-0">✕</Button>
+        </div>
+        <div className="flex-1 p-4">
+          {isLoading && <LoadingSpinner />}
+          {data?.viewUrl && (
+            <iframe
+              src={`${data.viewUrl}#toolbar=0`}
+              className="w-full h-[75vh] rounded-lg border
+                         border-slate-200"
+              title={title}
+              onContextMenu={(e) => e.preventDefault()}
+            />
+          )}
+        </div>
       </div>
     </div>
   )
